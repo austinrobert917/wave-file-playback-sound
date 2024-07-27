@@ -1,0 +1,38 @@
+import wave
+import pyaudio
+import time
+
+# Function to play a wave file
+def play_wave_file(filename):
+    # Open wave file
+    wf = wave.open(filename, 'rb')
+
+    # Create an interface to PortAudio
+    p = pyaudio.PyAudio()
+
+    # Open a .Stream object to write the WAV file to
+    stream = p.open(format=p.get_format_from_width(wf.getsampwidth()),
+                    channels=wf.getnchannels(),
+                    rate=wf.getframerate(),
+                    output=True)
+
+    # Read data in chunks
+    chunk = 1024
+    data = wf.readframes(chunk)
+
+    # Play the sound by writing the audio data to the stream
+    start_time = time.time()
+    with open("playback_log.txt", "w") as log_file:
+        log_file.write("Playback started\n")
+        while data:
+            stream.write(data)
+            data = wf.readframes(chunk)
+        end_time = time.time()
+        log_file.write(f"Playback ended\nDuration: {end_time - start_time:.2f} seconds\n")
+
+    # Close and terminate the stream
+    stream.close()
+    p.terminate()
+
+if __name__ == "__main__":
+    play_wave_file('example.wav')  # Replace 'example.wav' with your wave file path
